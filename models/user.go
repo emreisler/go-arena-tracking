@@ -2,6 +2,7 @@ package models
 
 import (
 	"arena"
+	"github.com/emreisler/go-arena-tracking/constants"
 	"github.com/emreisler/go-arena-tracking/tracking"
 )
 
@@ -13,6 +14,14 @@ type User struct {
 }
 
 func NewUser(ar *arena.Arena, id int, name string, tags []string) *User {
+	if !constants.GcOff {
+		return &User{
+			ID:   id,
+			Name: name,
+			Tags: tags,
+		}
+	}
+
 	u := arena.New[User](ar)
 	u.ID = id
 	u.Name = name

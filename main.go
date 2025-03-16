@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/emreisler/go-arena-tracking/constants"
 	"github.com/emreisler/go-arena-tracking/handlers"
 	"github.com/emreisler/go-arena-tracking/middleware"
 	"github.com/emreisler/go-arena-tracking/tracking"
@@ -24,7 +25,6 @@ func monitorMemory() {
 
 		if memStats.Alloc > memoryLimit {
 			fmt.Printf("Memory exceeded limit! Used: %d bytes\n", memStats.Alloc)
-			<-make(chan interface{})
 			os.Exit(1) // Force exit
 		}
 
@@ -33,9 +33,14 @@ func monitorMemory() {
 }
 
 func main() {
+
+	go tracking.StartTracer()
+
 	go monitorMemory()
 
-	closeGC()
+	if constants.GcOff {
+		closeGC()
+	}
 
 	r := gin.Default()
 
@@ -53,6 +58,8 @@ func main() {
 	r.GET("/debug/pprof/*any", gin.WrapH(http.DefaultServeMux))
 
 	r.Use(middleware.ArenaMiddleware())
+
+	r.GET("/jsontrace", tracking.TraceHandler)
 
 	r.POST("/user", handlers.UserHandler)
 

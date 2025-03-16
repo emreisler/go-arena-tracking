@@ -2,6 +2,7 @@ package models
 
 import (
 	"arena"
+	"github.com/emreisler/go-arena-tracking/constants"
 	"github.com/emreisler/go-arena-tracking/tracking"
 )
 
@@ -14,6 +15,15 @@ type Order struct {
 }
 
 func NewOrder(ar *arena.Arena, id, quantity int, price float64, items []string) *Order {
+	if constants.GcOff {
+		return &Order{
+			ID:       id,
+			Quantity: quantity,
+			Price:    price,
+			Items:    items,
+		}
+	}
+
 	o := arena.New[Order](ar)
 	o.ID = id
 	o.Quantity = quantity
